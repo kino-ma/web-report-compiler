@@ -4,11 +4,11 @@ services:
   serv:
     build: .
     ports:
-      - "5000:5000"
+      - "5001:5000"
     volumes:
       - "./app:/app"
       - "${MD_SRC_DIR}:/root/src"
     command: python3 serv.py
     environment:
-        - TOKEN=hogehoge
-        - LC_ALL=C
+      - TOKEN=hogehoge
+      - LC_ALL=C
