@@ -1,13 +1,14 @@
 from flask import Flask, request, render_template, send_file
 import os
+import sys
 import hashlib
 import subprocess
 
-TIMEOUT = 60
+TIMEOUT = 300
 PDF_MIMETYPE = "application/pdf"
 
 app = Flask(__name__)
-cmd = 'pandoc -F pandoc-crossref /app/report.md -o /app/report.pdf --pdf-engine lualatex -V luatexjapresetoptions=ipa -N'.split(
+cmd = 'pandoc -F pandoc-crossref /app/resume.md -o /app/resume.pdf --pdf-engine lualatex -V luatexjapresetoptions=ipa -N'.split(
     ' ')
 
 token = os.environ.get('TOKEN')
@@ -16,6 +17,7 @@ token = os.environ.get('TOKEN')
 def exec():
     # run code
     error = ''
+    success = True
     try:
         process = subprocess.run(
             cmd,
@@ -23,11 +25,13 @@ def exec():
             encoding='utf-8',
             timeout=TIMEOUT)
 
+        success = success and  process.returncode == 0
         error = process.stderr
     except subprocess.TimeoutExpired as e:
+        success = False
         error = 'Timed out'
 
-    return error
+    return success, error
 
 
 @app.route(f"/{token}", methods=['GET', 'POST'])
@@ -41,23 +45,24 @@ def index():
         # if request has body, use it as MD input
         if not code:
             # Save MD to file
-            filename = '/root/src/report.md'
+            filename = '/root/src/resume.md'
             with open(filename, mode='r') as f:
                 code = f.read()
 
-        with open('report.md', mode='w') as f:
+        with open('resume.md', mode='w') as f:
             f.write(code)
 
         # or, read original content
-        error = exec()
+        success, error = exec()
 
-        filename = "report.pdf"
+        filename = "resume.pdf"
 
-        if not error:
+        if success:
             response = send_file(filename, as_attachment=True,
                                  attachment_filename=filename,
                                  mimetype=PDF_MIMETYPE)
             response.headers['Content-Disposition'] = 'inline; filename=%s' % filename
+            print('stderr:', error, file=sys.stderr)
             return response
 
     return render_template('index.html', code=code, error=error)
