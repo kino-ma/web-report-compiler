@@ -44,7 +44,7 @@ def index():
 
         if not error:
             response = send_file(filename, as_attachment=True,
-                attachment_filename = filename, \
+                download_name = filename, \
                 mimetype = PDF_MIMETYPE)
             response.headers['Content-Disposition'] = 'inline; filename=%s' % filename
             return response
