@@ -8,7 +8,8 @@ TIMEOUT = 300
 PDF_MIMETYPE = "application/pdf"
 
 app = Flask(__name__)
-cmd = 'pandoc -F pandoc-crossref /app/resume.md -o /app/resume.pdf --pdf-engine lualatex -V luatexjapresetoptions=ipa -N'.split(
+cmd = 'pandoc -F pandoc-crossref /app/resume.md -o /app/resume.pdf --citeproc --bibliography=/root/src/resume.bib --pdf-engine lualatex -V luatexjapresetoptions=ipa -N'.split(
+#cmd = 'pandoc -F pandoc-crossref /app/resume.md -o /app/resume.pdf --bibliography=/root/src/resume.bib --pdf-engine lualatex -V luatexjapresetoptions=ipa -N'.split(
     ' ')
 
 token = os.environ.get('TOKEN')
@@ -64,6 +65,8 @@ def index():
             response.headers['Content-Disposition'] = 'inline; filename=%s' % filename
             print('stderr:', error, file=sys.stderr)
             return response
+
+        print('stderr:', error, file=sys.stderr)
 
     return render_template('index.html', code=code, error=error)
 
