@@ -1,19 +1,20 @@
 {
-  inputs.systems.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+  description = "Python application flake";
 
-  inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.mach-nix = {
-    url = "github:DavHau/mach-nix/8d903072c7b5426d90bc42a008242c76590af916";
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
+
+    mach-nix.url = "github:davhau/mach-nix";
   };
 
-  outputs = { self, flake-utils, nixpkgs, mach-nix, ... }:
+  outputs = { self, nixpkgs, mach-nix, flake-utils, ... }:
     let
       pythonVersion = "python39";
     in
-    flake-utils.lib.eachDefaultSystem (system: 
+    flake-utils.lib.eachDefaultSystem (system:
       let
-        inherit (nixpkgs.lib) optional;
-        pkgs = import nixpkgs { inherit system; };
+        pkgs = nixpkgs.legacyPackages.${system};
         mach = mach-nix.lib.${system};
 
         pythonApp = mach.buildPythonApplication ./.;
@@ -27,15 +28,27 @@
           config.Cmd = [ "${pythonApp}/bin/main" ];
         };
       in
-      rec {
-        packages = rec {
-          pythonPkg  = pythonApp;
+      rec
+      {
+        packages = {
+          image = pythonAppImage;
+
+          pythonPkg = pythonApp;
           default = packages.pythonPkg;
         };
 
-        apps.default = rec {
+        apps.default = {
           type = "app";
-          program = "${packages.pythonPkg}/bin/serv.py";
+          program = "${packages.pythonPkg}/bin/main";
         };
-      });
+
+        devShells.default = pkgs.mkShellNoCC {
+          packages = [ pythonAppEnv ];
+
+          shellHook = ''
+            export PYTHONPATH="${pythonAppEnv}/bin/python"
+          '';
+        };
+      }
+    );
 }
