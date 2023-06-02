@@ -17,7 +17,10 @@
         pkgs = nixpkgs.legacyPackages.${system};
         mach = mach-nix.lib.${system};
 
-        pythonApp = mach.buildPythonApplication ./.;
+        pythonApp = mach.buildPythonApplication {
+          src = ./.;
+          requirements = "flask";
+        };
         pythonAppEnv = mach.mkPython {
           python = pythonVersion;
           requirements = "flask";
