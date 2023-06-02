@@ -20,7 +20,7 @@
         pythonApp = mach.buildPythonApplication ./.;
         pythonAppEnv = mach.mkPython {
           python = pythonVersion;
-          requirements = builtins.readFile ./requirements.txt;
+          requirements = "flask";
         };
         pythonAppImage = pkgs.dockerTools.buildLayeredImage {
           name = pythonApp.pname;
