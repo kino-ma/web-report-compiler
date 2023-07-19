@@ -17,10 +17,27 @@
         pkgs = nixpkgs.legacyPackages.${system};
         mach = mach-nix.lib.${system};
 
-        pythonApp = mach.buildPythonApplication {
-          src = ./.;
-          requirements = "flask";
-        };
+        pythonApp =
+          let
+            pythonEnv = pkgs.python39.withPackages (ps: [
+              ps.flask
+            ]);
+          in
+          pkgs.stdenv.mkDerivation {
+            name = "wrc";
+            packages = [
+              pythonEnv
+            ];
+            src = ./.;
+            installPhase = ''
+              mkdir -p $out
+              cp -rv $src/* $out/
+              chmod u+x $out/app/serv.py
+            '';
+            environment.sessionVariables = "PYTHONPATH=${pythonEnv}";
+            
+          };
+
         pythonAppEnv = mach.mkPython {
           python = pythonVersion;
           requirements = "flask";
@@ -42,7 +59,7 @@
 
         apps.default = {
           type = "app";
-          program = "${packages.pythonPkg}/bin/main";
+          program = "${packages.pythonPkg}/app/serv.py";
         };
 
         devShells.default = pkgs.mkShellNoCC {
