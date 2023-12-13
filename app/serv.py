@@ -6,22 +6,22 @@ import subprocess
 
 from flask import Flask, request, render_template, send_file
 
+from cmd import PandocCmd
+
 TIMEOUT = 300
 PDF_MIMETYPE = "application/pdf"
 
 app = Flask(__name__)
-cmd = "pandoc -F pandoc-crossref ./data/resume.md -o ./data/resume.pdf --citeproc --bibliography=/root/src/resume.bib --pdf-engine lualatex -V luatexjapresetoptions=ipa -N".split(
-    # cmd = 'pandoc -F pandoc-crossref /app/resume.md -o /app/resume.pdf --bibliography=/root/src/resume.bib --pdf-engine lualatex -V luatexjapresetoptions=ipa -N'.split(
-    " "
-)
 
 token = os.environ.get("TOKEN")
 
 
-def exec():
+def exec(pandoc_command: PandocCmd):
     # run code
     error = ""
     success = True
+    cmd = pandoc_command.command()
+    print("executing command:", cmd)
     try:
         process = subprocess.run(
             cmd, capture_output=True, encoding="utf-8", timeout=TIMEOUT
@@ -55,7 +55,8 @@ def index():
             f.write(code)
 
         # or, read original content
-        success, error = exec()
+        command = PandocCmd()
+        success, error = exec(command)
 
         filename = "resume.pdf"
 
