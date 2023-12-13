@@ -1,10 +1,13 @@
 from dataclasses import dataclass, field
+from pathlib import Path
+
+data_directory = Path(__file__).parent.parent / "data"
 
 
 @dataclass
 class PandocCmd:
-    source: str = "./data/resume.md"
-    output: str = "./data/resume.pdf"
+    source: str = f"{data_directory}/resume.md"
+    output: str = f"{data_directory}/resume.pdf"
     filter: str = "pandoc-crossref"
     process_cite: bool = False
     pdf_engine: str = "lualatex"
@@ -15,12 +18,12 @@ class PandocCmd:
 
     def command(self) -> list[str]:
         cmd = ["pandoc"]
-        cmd.append(["--filter", self.filter])
+        cmd.extend(["--filter", self.filter])
 
         if self.process_cite:
             cmd.append("--citeproc")
 
-        cmd.extend([" --pdf-engine", self.pdf_engine])
+        cmd.extend(["--pdf-engine", self.pdf_engine])
 
         for key, val in self.variables.items():
             cmd.extend(["--variable", f"{key}:{val}"])

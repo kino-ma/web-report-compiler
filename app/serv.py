@@ -62,9 +62,9 @@ def index():
 
         if success:
             response = send_file(
-                filename,
+                command.output,
                 as_attachment=True,
-                attachment_filename=filename,
+                download_name=filename,
                 mimetype=PDF_MIMETYPE,
             )
             response.headers["Content-Disposition"] = "inline; filename=%s" % filename
