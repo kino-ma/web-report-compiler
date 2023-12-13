@@ -10,7 +10,7 @@ TIMEOUT = 300
 PDF_MIMETYPE = "application/pdf"
 
 app = Flask(__name__)
-cmd = 'pandoc -F pandoc-crossref /app/resume.md -o /app/resume.pdf --citeproc --bibliography=/root/src/resume.bib --pdf-engine lualatex -V luatexjapresetoptions=ipa -N'.split(
+cmd = 'pandoc -F pandoc-crossref ./data/resume.md -o ./data/resume.pdf --citeproc --bibliography=/root/src/resume.bib --pdf-engine lualatex -V luatexjapresetoptions=ipa -N'.split(
 #cmd = 'pandoc -F pandoc-crossref /app/resume.md -o /app/resume.pdf --bibliography=/root/src/resume.bib --pdf-engine lualatex -V luatexjapresetoptions=ipa -N'.split(
     ' ')
 
@@ -48,11 +48,11 @@ def index():
         # if request has body, use it as MD input
         if not code:
             # Save MD to file
-            filename = '/root/src/resume.md'
+            filename = './data/src.md'
             with open(filename, mode='r') as f:
                 code = f.read()
 
-        with open('resume.md', mode='w') as f:
+        with open('./data/resume.md', mode='w') as f:
             f.write(code)
 
         # or, read original content
